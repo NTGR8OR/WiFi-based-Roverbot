@@ -12,7 +12,8 @@ Function: Establishes WiFi AP for other modules (slaves) to connect
 #include <ESP8266WiFi.h>
 
 // Defining I/O pins
-#define		LED		2		// WiFi module LED onboard
+#define		LED			2		// WiFi module LED onboard
+#define		LED_SLAVE	21 		// Indicating connection with slave
 
 // Authentication variables
 char*			TKDssid;						// Master WiFi SSID
@@ -25,16 +26,20 @@ String			MACAddr;						// MAC address of AP
 #define		MAXC		6		// Maximum number of clients (6 given for safety)
 WiFiServer	TKDServer(9001);	// Master server and port number
 WiFiClient	TKDClient[MAXC];	// Master server clients
+
+// LED variables
+int 	LED_State 	= LOW;
 //----------------------------------------------------------------------------
 
 //----------------------------------------------------------------------------
 void setup()
 {
 	// Setting the serial port
-	Serial.begin(9600);		// Baud rate for communication
+	Serial.begin(9600);			// Baud rate for communication
 
 	// Setting the mode for pins
-	pinMode(LED, OUTPUT);	//WiFi module LED onboard
+	pinMode(LED, OUTPUT);		// WiFi module LED onboard
+	pinMode(LED_SLAVE, OUTPUT);	// Slave connection indicator LED
 
 	// Print setting progress
 	Serial.println("\nI/O pin modes set - DONE");
@@ -100,6 +105,11 @@ void AvailableClients()
 		{
 			digitalWrite(LED, LOW);
 		}
+
+		// If connectivity indicator LED on, turn it off and vice versa
+		LED_State = !digitalRead(LED_SLAVE);
+		digitalWrite(LED_SLAVE, LED_State);
+		delay(100);
 
 		// Count client token number
 		for(uint8_t token = 0; token < MAXC; token++)
